@@ -108,7 +108,9 @@ def robots_allowed(url: str, user_agent: str) -> bool:
     robots_url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
     parser = RobotFileParser(robots_url)
     try:
-        parser.read()
+        request = Request(robots_url, headers={"User-Agent": user_agent})
+        raw = urlopen(request, timeout=20).read().decode("utf-8", errors="replace")
+        parser.parse(raw.splitlines())
     except (HTTPError, URLError, OSError) as error:
         print(f"Skipping {url}: cannot verify {robots_url} ({error})", file=sys.stderr)
         return False
